@@ -4,10 +4,11 @@ project('salt_default',
         default_options: ['cpp_std=c++26'])
 
 gtkmm_dep = dependency('gtkmm-4.0')
+spdlog_dep = dependency('spdlog', version : '>=1.12')
 
 subdir('src')
 
 executable('salt_default',
            sources,
-           dependencies: gtkmm_dep
+           dependencies: [gtkmm_dep, spdlog_dep]
             )
