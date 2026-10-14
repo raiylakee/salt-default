@@ -8,20 +8,57 @@
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
+#include <gtkmm-4.0/gtkmm/application.h>
+#include <gtkmm-4.0/gtkmm/applicationwindow.h>
+#include <gtkmm-4.0/gtkmm/enums.h>
 #include <iostream>
 #include <print>
 #include <ranges>
 #include <spdlog/spdlog.h>
 #include <sstream>
 #include <string>
-#include <string_view>
 #include <system_error>
+
+#include <gtkmm-4.0/gtkmm.h>
+
+class MainWindow : public Gtk::ApplicationWindow
+{
+public:
+  MainWindow ()
+  {
+    set_title ("Hello gtk4");
+    set_default_size (400, 300);
+
+    root.set_orientation (Gtk::Orientation::HORIZONTAL);
+    set_child (root);
+
+    sidebar.set_stack (stack);
+    root.append (sidebar);
+
+    stack.add (page1, "Page 1", "Page 1");
+    stack.add (page2, "Page 2", "Page 2");
+
+    page1.set_label ("Page 1");
+    page2.set_label ("Page 2");
+
+    root.append (stack);
+  }
+
+private:
+  Gtk::Box root;
+  Gtk::Stack stack;
+  Gtk::StackSidebar sidebar;
+
+  Gtk::Label page1, page2;
+};
 
 namespace fs = std::filesystem;
 
 auto
-main (void) -> int
+main (int argc, char *argv[]) -> int
 {
+  auto app{ Gtk::Application::create ("org.salt.default") };
+
   spdlog::info ("Application loaded");
 
   spdlog::info ("Getting home directory path...");
@@ -76,5 +113,5 @@ main (void) -> int
 
   file.close ();
 
-  return 0;
+  return app->make_window_and_run<MainWindow> (argc, argv);
 }
