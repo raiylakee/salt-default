@@ -1,0 +1,21 @@
+[
+  {
+    "label": "meson: setup",
+    "command": "meson",
+    "args": ["setup", "builddir"]
+  },
+  {
+    "label": "meson: reconfigure (wipe)",
+    "command": "meson",
+    "args": ["setup", "builddir", "--wipe"]
+  },
+  {
+    "label": "build",
+    "command": "meson",
+    "args": ["compile", "-C", "builddir"]
+  },
+  {
+    "label": "run",
+    "command": "./builddir/salt_default"
+  }
+]
