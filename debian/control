@@ -1,0 +1,32 @@
+Source: salt-default
+Section: gnome
+Priority: optional
+Maintainer: Salt-Default Project <maintainer@example.com>
+Build-Depends: debhelper-compat (= 13),
+               meson,
+               ninja-build,
+               pkg-config,
+               g++,
+               libgtkmm-4.0-dev
+Standards-Version: 4.7.0
+Rules-Requires-Root: no
+Homepage: https://github.com/your-org/salt-default
+
+Package: salt-default
+Architecture: any
+Depends: ${shlibs:Depends},
+         ${misc:Depends}
+Description: Windows-style "Default Apps" settings panel for Linux
+ Salt-Default is a graphical settings panel that lets you choose which
+ application opens a given kind of file or link, the equivalent of the
+ Windows "Default apps" page.
+ .
+ It is backed by the standard XDG MIME database (mimeapps.list and
+ .desktop files), so the choices made here are honoured by the rest of
+ the desktop.
+ .
+ Features:
+  * set defaults per application, per file type (MIME) or per link type
+  * shows whether a default comes from user configuration or the system
+  * manage and restore removed associations
+  * reloads automatically when mimeapps.list changes elsewhere

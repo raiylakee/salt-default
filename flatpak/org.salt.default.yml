@@ -1,0 +1,128 @@
+# Flatpak manifest for salt-default
+#
+# Build from a git checkout of this repository (see README.md in this
+# directory for the full recipe and for the sandbox limitations):
+#
+#     flatpak install --user flathub org.gnome.Sdk//51 org.gnome.Platform//51
+#     flatpak-builder --user --force-clean --repo=repo builddir-flatpak \
+#                     flatpak/org.salt.default.yml
+#     flatpak --user remote-add --no-gpg-verify --if-not-exists salt-local "$PWD/repo"
+#     flatpak --user install -y salt-local org.salt.default
+#     flatpak run org.salt.default
+#
+# `--user` is required whenever the runtimes were installed with `--user`;
+# flatpak-builder resolves runtimes from the system installation otherwise.
+#
+# See flatpak/README.md for the sandbox caveats: because this is a
+# *host-wide* settings panel it needs broad permissions, so this build is
+# meant for self-distribution and is not Flathub-compatible.
+
+app-id: org.salt.default
+runtime: org.gnome.Platform
+# gtkmm 4.24 needs GTK >= 4.23.4 and glibmm 2.90 needs GLib >= 2.89.4,
+# both of which are in the GNOME 51 runtime.
+runtime-version: '51'
+sdk: org.gnome.Sdk
+command: salt-default-wrapper
+
+finish-args:
+  # The GNOME runtime does not ship gtkmm, so it is built below. It also
+  # cannot see the host's applications, so we give the sandbox access to
+  # the host OS (read-only) and to the user's home directory (where
+  # mimeapps.list and ~/.local/share/applications live).
+  - --filesystem=host-os
+  - --filesystem=home
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --device=dri
+
+modules:
+  - name: libsigc++
+    buildsystem: meson
+    config-opts:
+      - -Dbuild-documentation=false
+      - -Dbuild-examples=false
+      - -Dbuild-tests=false
+    sources:
+      - type: archive
+        url: https://download.gnome.org/sources/libsigc++/3.6/libsigc++-3.6.0.tar.xz
+        sha256: c3d23b37dfd6e39f2e09f091b77b1541fbfa17c4f0b6bf5c89baef7229080e17
+
+  - name: cairomm
+    buildsystem: meson
+    config-opts:
+      - -Dbuild-documentation=false
+      - -Dbuild-examples=false
+      - -Dbuild-tests=false
+    sources:
+      - type: archive
+        url: https://www.cairographics.org/releases/cairomm-1.18.1.tar.xz
+        sha256: e0e996a979ee52c840dca3ee74f5d005e3259b94ddce58f255d3b6f47c8cb41d
+
+  - name: glibmm
+    buildsystem: meson
+    config-opts:
+      - -Dbuild-documentation=false
+      - -Dbuild-examples=false
+    sources:
+      - type: archive
+        url: https://download.gnome.org/sources/glibmm/2.90/glibmm-2.90.0.tar.xz
+        sha256: e2efa45643f16b9fea2d6299f2f403d672eaeacddf0ff7f8094e1af9b0f5980b
+
+  - name: pangomm
+    buildsystem: meson
+    config-opts:
+      - -Dbuild-documentation=false
+    sources:
+      - type: archive
+        url: https://download.gnome.org/sources/pangomm/2.58/pangomm-2.58.0.tar.xz
+        sha256: 217514c1a65035c2fce6e69e33b0d92bafa2594cc474e995a4473441b10f3a33
+
+  - name: gtkmm
+    buildsystem: meson
+    config-opts:
+      - -Dbuild-documentation=false
+      - -Dbuild-demos=false
+      - -Dbuild-tests=false
+    sources:
+      - type: archive
+        url: https://download.gnome.org/sources/gtkmm/4.24/gtkmm-4.24.0.tar.xz
+        sha256: 7fd9cea356e7d3b74bf7d2a51d7e0e6763f3f9f1cddc5e77c8b0b5b7fa9d5e5a
+
+  - name: salt-default
+    buildsystem: meson
+    sources:
+      # Local checkout. For a release build, replace this with the tagged
+      # source instead, e.g.:
+      #
+      #   - type: git
+      #     url: https://github.com/your-org/salt-default.git
+      #     tag: v0.0.1
+      #     commit: <full 40-character commit id>
+      #
+      - type: dir
+        path: ..
+        # Never copy build output into the source tree: the flatpak build
+        # directory lives inside the repository, so without this it would be
+        # copied into itself.
+        skip:
+          - .git
+          - .flatpak-builder
+          - builddir
+          - builddir-flatpak
+          - repo
+    post-install:
+      # The wrapper ships inside flatpak/ and is therefore already part of
+      # the "dir" source above. Use the absolute path: the module directory
+      # is always mounted at /run/build/salt-default, while the working
+      # directory of post-install is not guaranteed to be the source dir.
+      - install -Dm755 /run/build/salt-default/flatpak/salt-default-wrapper.sh /app/bin/salt-default-wrapper
+      # Flatpak refuses to export a desktop file or an icon whose basename
+      # is not the app ID, so rename them ("salt-default.*" stays the name
+      # used by the native .deb/.rpm/AUR packages) and point Icon= at the
+      # exported name.
+      - mv /app/share/applications/salt-default.desktop /app/share/applications/org.salt.default.desktop
+      - mv /app/share/icons/hicolor/scalable/apps/salt-default.svg /app/share/icons/hicolor/scalable/apps/org.salt.default.svg
+      - sed -i 's|^Icon=salt-default$|Icon=org.salt.default|' /app/share/applications/org.salt.default.desktop
+      - sed -i 's|>salt-default.desktop<|>org.salt.default.desktop<|' /app/share/metainfo/org.salt.default.metainfo.xml

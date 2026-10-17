@@ -1,0 +1,12 @@
+#!/usr/bin/make -f
+
+# debhelper's meson buildsystem support runs `meson setup --buildtype=plain
+# --wrap-mode=nodownload --prefix=/usr`, which is exactly what we want.
+
+%:
+	dh $@
+
+# Packaging must be complete: every file that meson installs has to end up
+# in the .deb via debian/install.
+override_dh_missing:
+	dh_missing --fail-missing
