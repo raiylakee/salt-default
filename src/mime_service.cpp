@@ -274,8 +274,8 @@ icon_from_value (const std::string &value) -> Glib::RefPtr<Gio::Icon>
       // really there.
       if (Glib::file_test (path, Glib::FileTest::EXISTS))
         {
-          return Glib::wrap (G_FILE_ICON (
-              g_file_icon_new (Gio::File::create_for_path (path)->gobj ())));
+          return Glib::wrap (
+              g_file_icon_new (Gio::File::create_for_path (path)->gobj ()));
         }
       spdlog::debug ("icon {} not found", path);
     }
@@ -290,7 +290,7 @@ auto
 MimeService::is_scheme_mime (const std::string &mime) -> bool
 {
   constexpr std::string_view prefix = "x-scheme-handler/";
-  return mime.rfind (prefix.data (), 0) == 0;
+  return mime.starts_with (prefix);
 }
 
 auto
@@ -1344,7 +1344,7 @@ MimeService::default_app_id (const std::string &mime) -> std::string
 {
   ensure_synthetic_ids_loaded ();
 
-  const std::string user = user_default_id (mime);
+  std::string user = user_default_id (mime);
   if (!user.empty () && synthetic_ids_.count (user) != 0)
     {
       // A host application this sandbox cannot build, so GIO skipped it.
@@ -1373,7 +1373,7 @@ MimeService::default_app_id (const std::string &mime) -> std::string
   if (!gio.empty ())
     {
       // GIO may have answered with a fallthrough; mimeinfo.cache knows better.
-      const std::string system = system_default_id (mime);
+      std::string system = system_default_id (mime);
       if (!system.empty () && synthetic_ids_.count (system) != 0
           && system != gio)
         {

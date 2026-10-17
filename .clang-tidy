@@ -1,12 +1,17 @@
 ---
 # Checks that fit a small gtkmm application: correctness and cost, not style
 # (that is clang-format's job). Run with: just lint
+#
+# bugprone-empty-catch is off on purpose: GIO signals "key absent" and "value
+# unparsable" by throwing Glib::Error, and this code treats that as "keep the
+# default", so the empty catch is the intent rather than an oversight.
 Checks: >
   bugprone-*,
   clang-analyzer-*,
   performance-*,
   -bugprone-easily-swappable-parameters,
   -bugprone-exception-escape,
+  -bugprone-empty-catch,
 HeaderFilterRegex: 'src/.*'
 FormatStyle: file
 WarningsAsErrors: ''
