@@ -47,8 +47,8 @@ builddir-flatpak/
 
 # Flatpak
 .flatpak-builder/
-# flatpak-builder --repo=repo, run from the project root.
-/repo/
+# flatpak-builder --repo=repo, unanchored so flatpak/repo is covered too.
+repo/
 
 # Packaging output
 *.deb
