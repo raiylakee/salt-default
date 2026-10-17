@@ -18,6 +18,7 @@
 #include <glibmm/fileutils.h>
 #include <glibmm/keyfile.h>
 
+#include "app_id.h"
 #include "log.h"
 
 namespace salt
@@ -27,6 +28,66 @@ namespace fs = std::filesystem;
 
 namespace
 {
+
+// The running program's own desktop file id. It must not show up as a
+// choosable default for anything.
+auto
+self_desktop_id () -> const std::string &
+{
+  static const std::string id = std::string (kAppId) + ".desktop";
+  return id;
+}
+
+// The visibility rules the app list applies. Types are collected with the
+// same rules: a type is only worth listing when the application claiming it
+// is listed too, otherwise the chooser could offer nobody for it.
+auto
+app_is_listed (const Glib::RefPtr<Gio::AppInfo> &info) -> bool
+{
+  if (!info)
+    {
+      return false;
+    }
+  try
+    {
+      if (!info->should_show ())
+        {
+          return false;
+        }
+    }
+  catch (...)
+    {
+    }
+  auto desktop = std::dynamic_pointer_cast<Gio::DesktopAppInfo> (info);
+  if (!desktop)
+    {
+      return true;
+    }
+  try
+    {
+      if (desktop->is_hidden ())
+        {
+          return false;
+        }
+    }
+  catch (...)
+    {
+    }
+  try
+    {
+      if (desktop->has_key ("TryExec")
+          && !MimeService::try_exec_available (
+              std::string (desktop->get_string ("TryExec"))))
+        {
+          spdlog::debug ("hiding {}: TryExec missing", info->get_id ());
+          return false;
+        }
+    }
+  catch (...)
+    {
+    }
+  return true;
+}
 
 auto
 to_lower (std::string s) -> std::string
@@ -436,51 +497,12 @@ MimeService::load_apps () -> std::vector<AppEntry>
         {
           continue;
         }
-      bool show = true;
-      try
-        {
-          show = info->should_show ();
-        }
-      catch (...)
-        {
-          show = true;
-        }
-      if (!show)
+      if (!app_is_listed (info))
         {
           continue;
         }
-      // Hidden= and a missing TryExec binary must not appear either;
-      // should_show() covers only NoDisplay/OnlyShowIn/NotShowIn.
-      auto desktop = std::dynamic_pointer_cast<Gio::DesktopAppInfo> (info);
-      if (desktop)
-        {
-          try
-            {
-              if (desktop->is_hidden ())
-                {
-                  continue;
-                }
-            }
-          catch (...)
-            {
-            }
-          try
-            {
-              if (desktop->has_key ("TryExec")
-                  && !try_exec_available (
-                      std::string (desktop->get_string ("TryExec"))))
-                {
-                  spdlog::debug ("hiding {}: TryExec missing",
-                                 info->get_id ());
-                  continue;
-                }
-            }
-          catch (...)
-            {
-            }
-        }
       AppEntry e = entry_from_app_info (info);
-      if (e.id.empty ())
+      if (e.id.empty () || e.id == self_desktop_id ())
         {
           continue;
         }
@@ -877,7 +899,7 @@ MimeService::load_file_types () -> std::vector<MimeTypeEntry>
   // XDG mime database (e.g. custom types).
   for (auto &app : Gio::AppInfo::get_all ())
     {
-      if (!app)
+      if (!app_is_listed (app))
         {
           continue;
         }
@@ -896,6 +918,20 @@ MimeService::load_file_types () -> std::vector<MimeTypeEntry>
         }
       catch (...)
         {
+        }
+    }
+
+  // Types declared only by a host application GIO had to skip are still
+  // real types: the host can open them.
+  for (auto &app : synthetic_apps ())
+    {
+      for (auto &t : app.supported_types)
+        {
+          if (!is_scheme_mime (t)
+              && std::find (mimes.begin (), mimes.end (), t) == mimes.end ())
+            {
+              mimes.push_back (t);
+            }
         }
     }
 
@@ -922,7 +958,7 @@ MimeService::load_schemes () -> std::vector<MimeTypeEntry>
   std::vector<std::string> mimes;
   for (auto &app : Gio::AppInfo::get_all ())
     {
-      if (!app)
+      if (!app_is_listed (app))
         {
           continue;
         }
@@ -943,6 +979,20 @@ MimeService::load_schemes () -> std::vector<MimeTypeEntry>
         {
         }
     }
+  // Schemes claimed only by a host application GIO had to skip are still
+  // assignable, so they belong in the list too.
+  for (auto &app : synthetic_apps ())
+    {
+      for (auto &t : app.supported_types)
+        {
+          if (is_scheme_mime (t)
+              && std::find (mimes.begin (), mimes.end (), t) == mimes.end ())
+            {
+              mimes.push_back (t);
+            }
+        }
+    }
+
   // Include well-known schemes even when no app claims them so the
   // user can still assign one (mirrors Windows link-type list).
   for (const char *known : { "x-scheme-handler/http", "x-scheme-handler/https",

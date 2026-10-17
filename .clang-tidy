@@ -1,0 +1,12 @@
+---
+# Checks that fit a small gtkmm application: correctness and cost, not style
+# (that is clang-format's job). Run with: just lint
+Checks: >
+  bugprone-*,
+  clang-analyzer-*,
+  performance-*,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-exception-escape,
+HeaderFilterRegex: 'src/.*'
+FormatStyle: file
+WarningsAsErrors: ''

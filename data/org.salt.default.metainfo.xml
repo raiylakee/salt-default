@@ -24,14 +24,14 @@
     </ul>
   </description>
 
-  <launchable type="desktop-id">salt-default.desktop</launchable>
+  <launchable type="desktop-id">org.salt.default.desktop</launchable>
 
   <developer id="org.salt.default">
     <name>Salt-Default Project</name>
   </developer>
 
-  <url type="homepage">https://github.com/your-org/salt-default</url>
-  <url type="bugtracker">https://github.com/your-org/salt-default/issues</url>
+  <url type="homepage">https://github.com/raiylakee/salt-default</url>
+  <url type="bugtracker">https://github.com/raiylakee/salt-default/issues</url>
 
   <provides>
     <binary>salt_default</binary>

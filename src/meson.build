@@ -1,10 +1,16 @@
+# Backend only: no GTK widgets, so the test binary can link it without a
+# window.
+backend_sources = files(
+    'mime_service.cpp',
+    'mime_service.h',
+    'log.h',
+    'app_id.h',
+)
+
 sources = files(
     'main.cpp',
-    'mime_service.cpp',
     'app_window.cpp',
     'rows.cpp',
-    'log.h',
-    'mime_service.h',
-    'app_window.h',
-    'rows.h',
 )
+
+sources += backend_sources

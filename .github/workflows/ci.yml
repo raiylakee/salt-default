@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build, test and validate
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - name: Install dependencies
+        run: |
+          pacman -Syu --noconfirm --needed \
+            base-devel meson ninja clang clang-tools-extra \
+            gtkmm-4.0 desktop-file-utils appstream git
+
+      - uses: actions/checkout@v4
+
+      # The project is warning-free at this level; keep it that way.
+      - name: Configure
+        run: meson setup builddir -Dwarning_level=3 -Dwerror=true
+
+      - name: Build
+        run: meson compile -C builddir
+
+      - name: Test
+        run: meson test -C builddir --print-errorlogs
+
+      - name: Check formatting
+        run: |
+          find src tests -type f \( -name '*.cpp' -o -name '*.h' -o -name '*.hpp' \) \
+            -print0 | xargs -0 clang-format --dry-run --Werror
+
+      - name: Validate metadata
+        run: |
+          desktop-file-validate data/org.salt.default.desktop
+          appstreamcli validate --no-net data/org.salt.default.metainfo.xml
+          sh -n flatpak/salt-default-wrapper.sh
+
+      # makepkg refuses to run as root, so drop to a normal user.
+      - name: PKGBUILD and .SRCINFO agree
+        run: |
+          useradd -m makepkguser
+          chown -R makepkguser:makepkguser .
+          su makepkguser -c 'makepkg --printsrcinfo' > /tmp/srcinfo
+          diff -u .SRCINFO /tmp/srcinfo
+
+  debian:
+    name: Build the .deb
+    runs-on: ubuntu-latest
+    container: ubuntu:latest
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            build-essential debhelper meson ninja-build pkg-config \
+            libgtkmm-4.0-dev ca-certificates
+
+      - uses: actions/checkout@v4
+
+      - name: dpkg-buildpackage
+        run: dpkg-buildpackage -b -us -uc
+
+      - name: Inspect the package
+        run: dpkg-deb -c ../salt-default_*.deb

@@ -1,5 +1,6 @@
 #include <gtkmm/application.h>
 
+#include "app_id.h"
 #include "app_window.h"
 #include "log.h"
 
@@ -26,7 +27,7 @@ main (int argc, char *argv[]) -> int
 
   spdlog::info ("salt-default starting");
 
-  auto app = Gtk::Application::create ("org.salt.default");
+  auto app = Gtk::Application::create (salt::kAppId);
 
   spdlog::info ("Application loaded");
   return app->make_window_and_run<salt::MainWindow> (argc, argv);

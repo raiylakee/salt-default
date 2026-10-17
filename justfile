@@ -1,6 +1,7 @@
 builddir := "builddir"
 exe := builddir + "/salt_default"
 prefix := "/usr/local"
+sources := "find src tests -type f"
 
 default:
     @just --list
@@ -17,6 +18,9 @@ build:
 run: build
     ./{{exe}}
 
+test: build
+    meson test -C {{builddir}} --print-errorlogs
+
 install: build
     meson install -C {{builddir}}
 
@@ -29,10 +33,13 @@ uninstall:
     ninja -C {{builddir}} uninstall
 
 format:
-    find src -name '*.cpp' -o -name '*.h' -o -name '*.hpp' | xargs clang-format -i
+    {{sources}} \( -name '*.cpp' -o -name '*.h' -o -name '*.hpp' \) -print0 | xargs -0 clang-format -i
 
-lint:
-    find src -name '*.cpp' -o -name '*.h' | xargs clang-tidy -p {{builddir}}
+check-format:
+    {{sources}} \( -name '*.cpp' -o -name '*.h' -o -name '*.hpp' \) -print0 | xargs -0 clang-format --dry-run --Werror
+
+lint: build
+    {{sources}} \( -name '*.cpp' -o -name '*.h' \) -print0 | xargs -0 clang-tidy -p {{builddir}}
 
 clean:
     rm -rf {{builddir}}
@@ -42,6 +49,12 @@ clean:
 # Arch Linux (needs base-devel); builds and installs the local package.
 aur:
     makepkg -si
+
+# Refresh the source sums and regenerate .SRCINFO. Needs the release tag to
+# exist (CHANGELOG: v0.0.1) because makepkg has to fetch the tarball.
+aur-sums:
+    updpkgsums
+    makepkg --printsrcinfo > .SRCINFO
 
 # Debian / Ubuntu: writes ../salt-default_<version>_<arch>.deb
 deb:
@@ -57,6 +70,6 @@ flatpak:
 
 # Metadata sanity checks used by the packages above.
 check-metadata:
-    desktop-file-validate data/salt-default.desktop
+    desktop-file-validate data/org.salt.default.desktop
     appstreamcli validate --no-net data/org.salt.default.metainfo.xml
-
+    sh -n flatpak/salt-default-wrapper.sh
