@@ -4,6 +4,10 @@
 C++ binding stack (libsigc++, cairomm, glibmm, pangomm, gtkmm) because the
 GNOME runtime ships GTK itself but **not** gtkmm.
 
+The manifest pulls its source from GitHub, pinned to a commit (the comment in
+the manifest shows the tagged form to use for a release and the `type: dir`
+form to test a local checkout).
+
 ## Build and run (verified end to end)
 
 ```sh
@@ -29,7 +33,7 @@ repo to hand to other machines.
 |---|---|---|
 | `org.gnome.Sdk/x86_64/51 not installed` | `flatpak-builder` resolves runtimes from the **system** installation by default, but `--user` was used to install them | pass `--user` too |
 | the deps step tries `flatpak --system install` and times out | `--install-deps-from=flathub` always installs **system-wide** | omit it when the runtimes are already installed |
-| the build directory is copied into itself | the `type: dir` source copies the repository root and the build directory lives inside it | the `skip:` list in the manifest |
+| the build directory is copied into itself | the `type: dir` source copies the repository root and the build directory lives inside it | the commented `type: dir` variant in the manifest lists the build directory in `skip:` |
 | `install: cannot stat 'salt-default-wrapper.sh'` | `post-install` does **not** run with the module source dir as its working directory | the manifest uses absolute `/run/build/salt-default/...` paths |
 | `appstreamcli compose failed: missing-launchable-desktop-file` | Flatpak only exports `<app-id>.desktop` / `<app-id>.svg`, so the desktop file, the icon **and** the metainfo `<launchable>` must all agree | the source files are already named after the app id (`data/org.salt.default.desktop`, `…/org.salt.default.svg`, `<launchable>`), so nothing has to be rewritten |
 | `flatpak-builder: command not found` | not packaged by every distribution | `flatpak run --command=flatpak-builder org.flatpak.Builder ...` (add `--disable-rofiles-fuse` if `/dev/fuse` is unavailable), or unpack the distribution package elsewhere and run its binary |

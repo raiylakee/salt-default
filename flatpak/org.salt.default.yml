@@ -93,25 +93,28 @@ modules:
   - name: salt-default
     buildsystem: meson
     sources:
-      # Local checkout. For a release build, replace this with the tagged
-      # source instead, e.g.:
+      # Pinned so the build is reproducible from anywhere. Releases should use
+      # the tag instead:
       #
       #   - type: git
-      #     url: https://github.com/your-org/salt-default.git
+      #     url: https://github.com/raiylakee/salt-default.git
       #     tag: v0.0.1
       #     commit: <full 40-character commit id>
       #
-      - type: dir
-        path: ..
-        # Never copy build output into the source tree: the flatpak build
-        # directory lives inside the repository, so without this it would be
-        # copied into itself.
-        skip:
-          - .git
-          - .flatpak-builder
-          - builddir
-          - builddir-flatpak
-          - repo
+      # To test a local checkout instead, swap this source for:
+      #
+      #   - type: dir
+      #     path: ..
+      #     skip:
+      #       - .git
+      #       - .flatpak-builder
+      #       - builddir
+      #       - builddir-flatpak
+      #       - repo
+      #
+      - type: git
+        url: https://github.com/raiylakee/salt-default.git
+        commit: c1b7c059be8c632c43d294a63a5b5fa2ea4f7441
     post-install:
       # The wrapper ships inside flatpak/. Use the absolute path: the module
       # directory is always mounted at /run/build/salt-default, while the
