@@ -15,7 +15,7 @@ Release:        1%{?dist}
 Summary:        Windows-style "Default Apps" settings panel for Linux
 
 License:        GPL-3.0-or-later
-URL:            https://github.com/your-org/salt-default
+URL:            https://github.com/raiylakee/salt-default
 Source0:        %{url}/archive/refs/tags/v%{version}.tar.gz
 
 BuildRequires:  gcc-c++
@@ -53,7 +53,7 @@ Features:
 %meson_install
 
 %check
-desktop-file-validate %{buildroot}%{_datadir}/applications/salt-default.desktop
+desktop-file-validate %{buildroot}%{_datadir}/applications/org.salt.default.desktop
 # AppStream validation needs network access for some checks; never fail the
 # build over it.
 appstreamcli validate --no-net %{buildroot}%{_datadir}/metainfo/org.salt.default.metainfo.xml || true
@@ -62,10 +62,10 @@ appstreamcli validate --no-net %{buildroot}%{_datadir}/metainfo/org.salt.default
 %license LICENSE
 %doc README.md
 %{_bindir}/salt_default
-%{_datadir}/applications/salt-default.desktop
+%{_datadir}/applications/org.salt.default.desktop
 %{_datadir}/metainfo/org.salt.default.metainfo.xml
-%{_datadir}/icons/hicolor/scalable/apps/salt-default.svg
+%{_datadir}/icons/hicolor/scalable/apps/org.salt.default.svg
 
 %changelog
-* Sat Oct 17 2026 Salt-Default Project <maintainer@example.com> - 0.0.1-1
+* Sat Oct 17 2026 Refliqx <mr.abdillah2112@gmail.com> - 0.0.1-1
 - Initial package.

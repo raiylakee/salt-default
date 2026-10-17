@@ -113,16 +113,8 @@ modules:
           - builddir-flatpak
           - repo
     post-install:
-      # The wrapper ships inside flatpak/ and is therefore already part of
-      # the "dir" source above. Use the absolute path: the module directory
-      # is always mounted at /run/build/salt-default, while the working
-      # directory of post-install is not guaranteed to be the source dir.
+      # The wrapper ships inside flatpak/. Use the absolute path: the module
+      # directory is always mounted at /run/build/salt-default, while the
+      # working directory of post-install is not guaranteed to be the source
+      # dir.
       - install -Dm755 /run/build/salt-default/flatpak/salt-default-wrapper.sh /app/bin/salt-default-wrapper
-      # Flatpak refuses to export a desktop file or an icon whose basename
-      # is not the app ID, so rename them ("salt-default.*" stays the name
-      # used by the native .deb/.rpm/AUR packages) and point Icon= at the
-      # exported name.
-      - mv /app/share/applications/salt-default.desktop /app/share/applications/org.salt.default.desktop
-      - mv /app/share/icons/hicolor/scalable/apps/salt-default.svg /app/share/icons/hicolor/scalable/apps/org.salt.default.svg
-      - sed -i 's|^Icon=salt-default$|Icon=org.salt.default|' /app/share/applications/org.salt.default.desktop
-      - sed -i 's|>salt-default.desktop<|>org.salt.default.desktop<|' /app/share/metainfo/org.salt.default.metainfo.xml

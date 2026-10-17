@@ -1,7 +1,7 @@
 Source: salt-default
 Section: gnome
 Priority: optional
-Maintainer: Salt-Default Project <maintainer@example.com>
+Maintainer: Refliqx <mr.abdillah2112@gmail.com>
 Build-Depends: debhelper-compat (= 13),
                meson,
                ninja-build,
@@ -10,7 +10,7 @@ Build-Depends: debhelper-compat (= 13),
                libgtkmm-4.0-dev
 Standards-Version: 4.7.0
 Rules-Requires-Root: no
-Homepage: https://github.com/your-org/salt-default
+Homepage: https://github.com/raiylakee/salt-default
 
 Package: salt-default
 Architecture: any

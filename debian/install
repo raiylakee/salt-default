@@ -1,4 +1,4 @@
 usr/bin/salt_default
-usr/share/applications/salt-default.desktop
+usr/share/applications/org.salt.default.desktop
 usr/share/metainfo/org.salt.default.metainfo.xml
-usr/share/icons/hicolor/scalable/apps/salt-default.svg
+usr/share/icons/hicolor/scalable/apps/org.salt.default.svg

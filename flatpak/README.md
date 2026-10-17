@@ -31,7 +31,7 @@ repo to hand to other machines.
 | the deps step tries `flatpak --system install` and times out | `--install-deps-from=flathub` always installs **system-wide** | omit it when the runtimes are already installed |
 | the build directory is copied into itself | the `type: dir` source copies the repository root and the build directory lives inside it | the `skip:` list in the manifest |
 | `install: cannot stat 'salt-default-wrapper.sh'` | `post-install` does **not** run with the module source dir as its working directory | the manifest uses absolute `/run/build/salt-default/...` paths |
-| `appstreamcli compose failed: missing-launchable-desktop-file` | Flatpak only exports `<app-id>.desktop` / `<app-id>.svg`, so the desktop file, the icon **and** the metainfo `<launchable>` must all agree | `post-install` renames them and rewrites `<launchable>` |
+| `appstreamcli compose failed: missing-launchable-desktop-file` | Flatpak only exports `<app-id>.desktop` / `<app-id>.svg`, so the desktop file, the icon **and** the metainfo `<launchable>` must all agree | the source files are already named after the app id (`data/org.salt.default.desktop`, `…/org.salt.default.svg`, `<launchable>`), so nothing has to be rewritten |
 | `flatpak-builder: command not found` | not packaged by every distribution | `flatpak run --command=flatpak-builder org.flatpak.Builder ...` (add `--disable-rofiles-fuse` if `/dev/fuse` is unavailable), or unpack the distribution package elsewhere and run its binary |
 
 ## Why this is not a Flathub app
@@ -91,13 +91,20 @@ Native build versus the Flatpak, both reading the same host database:
 
 | | Apps | File types | Link types |
 |---|---|---|---|
-| Native | 37 | 1220 | 21 |
-| Flatpak | 38 | 1218 | 15 |
+| Native | 37 | 1220 | 19 |
+| Flatpak | 37 | 1220 | 19 |
 
-The Flatpak lists one application the native build does not: itself
-(`org.salt.default.desktop`, exported into `/app/share/applications`, which the
-wrapper keeps on `XDG_DATA_DIRS`). Every host application the native build
-lists is listed inside the sandbox too.
+The three lists are byte-identical in both environments (each entry was
+compared, not just the totals), which is the point of applying one visibility
+rule to GIO's app infos and to the directly parsed host desktop files. Two
+consequences come with that: the panel hides itself, and a handler that exists
+only in the sandbox is not offered — the runtime ships `org.gnome.Yelp.desktop`,
+which claims `x-scheme-handler/ghelp`, `help`, `info` and `man`, so those four
+link types do not appear, because the host cannot run Yelp. The reverse case is
+the host's `antigravity-ide-url-handler.desktop` and
+`com.microsoft.VSCode.UrlHandler.desktop` (`NoDisplay=true`): their link types
+are hidden on both sides rather than leaving rows the panel cannot offer an
+application for.
 
 Also verified inside the sandbox: the host home is writable (a file written by
 the app lands in the real `~/.config`), the host `/usr/share/applications` is
@@ -149,7 +156,8 @@ application disappears from GIO's view. Two mechanisms deal with that:
    builds the entry from the desktop file: desktop file ID, `Name`, `Comment`,
    `Icon`, `Terminal`, `TryExec` and `MimeType`, applying the same visibility
    rules GIO applies (`Type=Application`, `Hidden`, `NoDisplay`,
-   `OnlyShowIn`/`NotShowIn`). That took the list from **27 to 38**.
+   `OnlyShowIn`/`NotShowIn`). That took the list from **27 to 37** (38 before the
+   panel started filtering its own desktop file out).
 
 Those entries have no `Gio::AppInfo`, so:
 
@@ -198,12 +206,13 @@ Those entries have no `Gio::AppInfo`, so:
   | `[Added Associations]` | `mime=id;…;` (accumulated) | same |
   | `[Removed Associations]` | entry for the type dropped | same |
 
-  A scratch test against the real `mime_service.cpp` with a fake XDG
-  environment covers the whole path: the synthetic entry is listed while
-  `Hidden`, `NoDisplay`, `OnlyShowIn`, `Type=Link` and nameless files are not,
-  `MimeType=` feeds the chooser, the id fallback resolves (including a
-  candidate GIO skipped in favour of a buildable one), and the written file
-  keeps unrelated groups intact.
+  The test suite in `tests/mime_service_test.cpp` (`just test`) runs the real
+  `mime_service.cpp` against a fake XDG environment: the synthetic entry is
+  listed while `Hidden`, `NoDisplay`, `OnlyShowIn`, `Type=Link` and nameless
+  files are not, `MimeType=` feeds the chooser, the id fallback resolves
+  (including a candidate GIO skipped in favour of a buildable one), the
+  written file keeps unrelated groups intact, and neither the panel's own
+  desktop file nor the types of an invisible application leak into the lists.
 
 This is deliberately sandbox-only: on the host an unresolvable `Exec`/`TryExec`
 really does mean the entry cannot be launched, and it stays hidden.

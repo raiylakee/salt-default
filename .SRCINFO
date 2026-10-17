@@ -2,7 +2,7 @@ pkgbase = salt-default
 	pkgdesc = Windows-style Default Apps settings panel for Linux (GTK4 / XDG)
 	pkgver = 0.0.1
 	pkgrel = 1
-	url = https://github.com/your-org/salt-default
+	url = https://github.com/raiylakee/salt-default
 	arch = x86_64
 	arch = aarch64
 	license = GPL-3.0-or-later
@@ -16,7 +16,7 @@ pkgbase = salt-default
 	depends = glibmm-2.68
 	provides = salt-default
 	conflicts = salt-default-git
-	source = salt-default-0.0.1.tar.gz::https://github.com/your-org/salt-default/archive/refs/tags/v0.0.1.tar.gz
+	source = salt-default-0.0.1.tar.gz::https://github.com/raiylakee/salt-default/archive/refs/tags/v0.0.1.tar.gz
 	sha256sums = SKIP
 
 pkgname = salt-default

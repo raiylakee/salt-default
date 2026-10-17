@@ -1,9 +1,9 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: salt-default
-Source: https://github.com/your-org/salt-default
+Source: https://github.com/raiylakee/salt-default
 
 Files: *
-Copyright: 2026 Salt-Default Project
+Copyright: 2026 Refliqx
 License: GPL-3.0-or-later
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
