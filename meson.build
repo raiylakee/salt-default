@@ -6,8 +6,11 @@ project('salt_default',
 gtkmm_dep = dependency('gtkmm-4.0')
 
 subdir('src')
+subdir('data')
 
 executable('salt_default',
            sources,
-           dependencies: [gtkmm_dep]
+           dependencies: [gtkmm_dep],
+           install: true,
+           install_dir: get_option('bindir'),
             )

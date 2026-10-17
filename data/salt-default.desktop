@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Salt-Default
+GenericName=Default Applications
+Comment=Choose default applications for file types and link types
+Exec=salt_default
+Icon=salt-default
+Terminal=false
+Categories=Settings;
+Keywords=default;applications;mime;associations;file type;link type;
+StartupNotify=true
+X-GNOME-Settings-Panel=default-applications

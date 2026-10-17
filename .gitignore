@@ -42,6 +42,19 @@
 build/
 Build/
 build-*/
+builddir/
+builddir-flatpak/
+
+# Flatpak
+.flatpak-builder/
+# flatpak-builder --repo=repo, run from the project root.
+/repo/
+
+# Packaging output
+*.deb
+*.rpm
+*.tar.gz
+*.tar.xz
 
 # CMake generated files
 CMakeFiles/

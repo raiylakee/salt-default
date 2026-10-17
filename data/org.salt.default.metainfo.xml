@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.salt.default</id>
+
+  <name>Salt-Default</name>
+  <summary>Choose default applications for file and link types</summary>
+
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+
+  <description>
+    <p>
+      Salt-Default is a Windows-style Default Apps settings panel for Linux.
+      It lets you pick which application opens a given kind of file or link,
+      from a single graphical interface.
+    </p>
+    <p>Features:</p>
+    <ul>
+      <li>Set defaults per application, per file type (MIME), or per link type</li>
+      <li>Uses the standard XDG mimeapps.list, so other desktop apps respect your choice</li>
+      <li>Shows whether a default comes from your user config or the system</li>
+      <li>Manage and restore removed associations</li>
+      <li>Reloads automatically when mimeapps.list changes elsewhere</li>
+    </ul>
+  </description>
+
+  <launchable type="desktop-id">salt-default.desktop</launchable>
+
+  <developer id="org.salt.default">
+    <name>Salt-Default Project</name>
+  </developer>
+
+  <url type="homepage">https://github.com/your-org/salt-default</url>
+  <url type="bugtracker">https://github.com/your-org/salt-default/issues</url>
+
+  <provides>
+    <binary>salt_default</binary>
+  </provides>
+
+  <categories>
+    <category>Settings</category>
+    <category>System</category>
+  </categories>
+
+  <content_rating type="oars-1.1"/>
+
+  <releases>
+    <release version="0.0.1" date="2026-10-17">
+      <description>
+        <p>Initial development release.</p>
+      </description>
+    </release>
+  </releases>
+</component>

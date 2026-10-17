@@ -1,8 +1,6 @@
 #pragma once
-// Minimal spdlog-compatible shim so the project builds without the
-// external spdlog package (not available on all distros).
-// API used: spdlog::info/debug/warn/error(fmt, args...)
-// Implemented on top of C++26 <print>.
+// Minimal spdlog-compatible shim (spdlog is not packaged on every distro):
+// info/debug/warn/error(fmt, args...) on top of C++26 <print>.
 
 #include <format>
 #include <print>
